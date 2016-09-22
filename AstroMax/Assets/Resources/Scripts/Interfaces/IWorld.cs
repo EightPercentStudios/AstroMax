@@ -13,4 +13,7 @@ public interface IWorld
 
 	// Convert lane number to a lane end point
 	Vector2 LaneToEndPoint(float lane);
+
+	// Check if given position is off the world
+	bool IsPointOutOfBounds(Vector2 position);
 }

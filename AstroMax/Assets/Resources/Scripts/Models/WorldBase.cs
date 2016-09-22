@@ -47,4 +47,12 @@ public class WorldBase : IWorld
 
 		return new Vector2(x, y);
 	}
+
+	public bool IsPointOutOfBounds(Vector2 point)
+	{
+		return (point.x < this.lowerBound.x ||
+			point.x > this.upperBound.x ||
+			point.y < this.lowerBound.y ||
+			point.y > this.upperBound.y);
+	}
 }

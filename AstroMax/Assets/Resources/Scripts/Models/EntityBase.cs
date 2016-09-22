@@ -21,8 +21,13 @@ public abstract class EntityBase : IEntity
 		return this.position;
 	}
 
-	public virtual void Update(float deltaTime)
+	public virtual void Update(float deltaTime, IWorld world)
 	{
 
+	}
+
+	public virtual void Destroy()
+	{
+		//this = null;
 	}
 }

@@ -18,14 +18,17 @@ public class GameController : MonoBehaviour
 		Vector2 upperPoint = Camera.main.ViewportToWorldPoint(new Vector2(1, 1));
 		this.worldModel = new WorldBase(5, upperPoint, lowerPoint);
 
-		Debug.Log(lowerPoint.x + " - " + upperPoint.x);
-
 		// Start level model
 		this.levelModel = new LevelBase(this.worldModel, spawner);
 		this.levelModel.Load();
 
 		//
 		debugDrawOn = true;
+	}
+
+	void Start()
+	{
+		this.levelModel.Start();
 	}
 
 	void Update()

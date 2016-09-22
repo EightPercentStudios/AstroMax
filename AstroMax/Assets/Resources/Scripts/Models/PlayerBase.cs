@@ -5,7 +5,6 @@ using System.Collections.Generic;
 public class PlayerBase : KillableEntityBase, IPlayer
 {
 	// Internal Properties
-	private IWorld world;
 	private GameObject playerGameObject;
 	private int currentLane;
 	private int targetLane;
@@ -14,10 +13,13 @@ public class PlayerBase : KillableEntityBase, IPlayer
 	private IPlayerController controller;
 	private bool moving;
 
-	public PlayerBase(Vector2 position, int hitPoints, IWorld world, GameObject playerObject) : base(position, hitPoints)
+	// Public delegates
+	private LevelBase.FireBulletMethod fireMethod;
+
+	public PlayerBase(Vector2 position, int hitPoints, GameObject playerObject, LevelBase.FireBulletMethod fbMethod) : base(position, hitPoints)
 	{
-		this.world = world;
 		this.playerGameObject = playerObject;
+		this.fireMethod = fbMethod;
 
 		this.currentLane = 3;
 		this.targetLane = 3;
@@ -29,14 +31,14 @@ public class PlayerBase : KillableEntityBase, IPlayer
 		UpdatePosition();
 	}
 
-	public override void Update(float deltaTime)
+	public override void Update(float deltaTime, IWorld world)
 	{
-		HandleInput();
-		Move(deltaTime);
+		HandleInput(world);
+		Move(deltaTime, world);
 		UpdatePosition();
 	}
 
-	private void HandleInput()
+	private void HandleInput(IWorld world)
 	{
 		PlayerMoveDirection dir = this.controller.PollInput();
 		if (dir == PlayerMoveDirection.NONE)
@@ -57,7 +59,7 @@ public class PlayerBase : KillableEntityBase, IPlayer
 		}
 	}
 
-	private void Move(float deltaTime)
+	private void Move(float deltaTime, IWorld world)
 	{
 		if (!moving)
 		{
@@ -83,6 +85,7 @@ public class PlayerBase : KillableEntityBase, IPlayer
 			{
 				this.moving = false;
 				this.currentLane = this.targetLane;
+				this.fireMethod(this.position);
 			}
 		}
 	}
