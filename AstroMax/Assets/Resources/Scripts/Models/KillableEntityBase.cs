@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public abstract class KillableEntityBase : EntityBase
+public abstract class KillableEntityBase : EntityBase, IKillableEntity
 {
 	// Internal Properties
 	protected int hitPoints;
@@ -16,7 +16,7 @@ public abstract class KillableEntityBase : EntityBase
 		this.alive = true;
 	}
 
-	public int TakeDamage(int damagePoints)
+	public virtual int TakeDamage(int damagePoints)
 	{
 		this.hitPoints -= damagePoints;
 		if (this.hitPoints <= 0)

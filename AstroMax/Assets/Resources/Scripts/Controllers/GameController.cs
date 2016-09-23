@@ -5,10 +5,11 @@ public class GameController : MonoBehaviour
 {
 	// Temp Prefab references
 	public Spawner spawner;
+	public LevelBase levelModel;
 	private bool debugDrawOn = false;
 
 	// Model
-	private ILevel levelModel;
+	//private ILevel levelModel;
 	private IWorld worldModel;
 
 	void Awake()
@@ -19,7 +20,8 @@ public class GameController : MonoBehaviour
 		this.worldModel = new WorldBase(5, upperPoint, lowerPoint);
 
 		// Start level model
-		this.levelModel = new LevelBase(this.worldModel, spawner);
+		//this.levelModel = new LevelBase(this.worldModel, spawner);
+		this.levelModel.Setup(this.worldModel, spawner);
 		this.levelModel.Load();
 
 		//
@@ -28,12 +30,12 @@ public class GameController : MonoBehaviour
 
 	void Start()
 	{
-		this.levelModel.Start();
+		//this.levelModel.Start();
 	}
 
 	void Update()
 	{
-		this.levelModel.Update(Time.deltaTime);
+		//this.levelModel.Update(Time.deltaTime);
 	}
 
 	// Debug draw

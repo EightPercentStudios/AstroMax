@@ -11,7 +11,7 @@ public interface ILevel
 	void Cleanup();
 
 	// Game Tick
-	void Update(float deltaTime);
+	//void Update(float deltaTime);
 
 	// Get Properties
 	int GetScore();
