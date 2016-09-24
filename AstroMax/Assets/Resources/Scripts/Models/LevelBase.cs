@@ -11,6 +11,10 @@ public class LevelBase : MonoBehaviour, ILevel // Add spawner (monobehaviour)
 	private List<BulletBase> bullets;
 	private List<IKillableEntity> enemies;
 
+	// Object pools
+	private IObjectPool bulletPool;
+	public GameObject bulletPrefab;
+
 	private bool paused;
 	private int score;
 	private bool setup = false;
@@ -27,6 +31,8 @@ public class LevelBase : MonoBehaviour, ILevel // Add spawner (monobehaviour)
 		this.score = 0;
 		this.bullets = new List<BulletBase>();
 		this.enemies = new List<IKillableEntity>();
+
+		this.bulletPool = new ObjectPool(bulletPrefab, 10);
 
 		this.setup = true;
 	}
@@ -51,7 +57,7 @@ public class LevelBase : MonoBehaviour, ILevel // Add spawner (monobehaviour)
 		// Random lane
 		int lane = Random.Range(0, this.world.GetLaneCount()) + 1;
 		Vector2 randomPosition = new Vector2(this.world.LaneToEndPoint(lane).x, this.world.GetUpperBound().y);
-		Debug.Log(lane);
+		//Debug.Log(lane);
 
 		GameObject enemyGraphics = this.spawner.SpawnPrefab("Enemy");
 		IKillableEntity enemy = new EnemyBase(randomPosition, 2, enemyGraphics);
@@ -60,8 +66,10 @@ public class LevelBase : MonoBehaviour, ILevel // Add spawner (monobehaviour)
 
 	private void FireBullet(Vector2 position)
 	{
-		GameObject bullet = this.spawner.SpawnPrefab("Bullet");
-		BulletBase b = new BulletBase(position, 20.0f, bullet);
+		//GameObject bullet = this.spawner.SpawnPrefab("Bullet");
+		GameObject bullet = this.bulletPool.GetObjectInstance();
+		BulletBase b = new BulletBase(position, 20.0f);
+		b.SetGameObject(bullet);
 		this.bullets.Add(b);
 	}
 
@@ -122,7 +130,10 @@ public class LevelBase : MonoBehaviour, ILevel // Add spawner (monobehaviour)
 		// Destroy all dead entities
 		foreach (BulletBase bullet in this.bullets)
 			if (!bullet.IsAlive())
+			{
+				this.bulletPool.ReturnObjectInstance(bullet.ReturnGameObject());
 				bullet.Destroy();
+			}
 		foreach (IKillableEntity enemy in this.enemies)
 			if (!enemy.IsAlive())
 				enemy.Destroy();
