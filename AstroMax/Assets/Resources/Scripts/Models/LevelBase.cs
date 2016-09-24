@@ -9,11 +9,14 @@ public class LevelBase : MonoBehaviour, ILevel // Add spawner (monobehaviour)
 	private IPlayer player;
 	private ISpawner spawner;
 	private List<BulletBase> bullets;
-	private List<IKillableEntity> enemies;
+	private List<EnemyBase> enemies;
 
 	// Object pools
 	private IObjectPool bulletPool;
 	public GameObject bulletPrefab;
+
+	private IObjectPool enemyPool;
+	public GameObject enemyPrefab;
 
 	private bool paused;
 	private int score;
@@ -30,9 +33,10 @@ public class LevelBase : MonoBehaviour, ILevel // Add spawner (monobehaviour)
 		this.paused = false;
 		this.score = 0;
 		this.bullets = new List<BulletBase>();
-		this.enemies = new List<IKillableEntity>();
+		this.enemies = new List<EnemyBase>();
 
 		this.bulletPool = new ObjectPool("Bullet Pool", bulletPrefab, 10);
+		this.enemyPool = new ObjectPool("Test Enemy Pool", enemyPrefab, 5);
 
 		this.setup = true;
 	}
@@ -59,8 +63,10 @@ public class LevelBase : MonoBehaviour, ILevel // Add spawner (monobehaviour)
 		Vector2 randomPosition = new Vector2(this.world.LaneToEndPoint(lane).x, this.world.GetUpperBound().y);
 		//Debug.Log(lane);
 
-		GameObject enemyGraphics = this.spawner.SpawnPrefab("Enemy");
-		IKillableEntity enemy = new EnemyBase(randomPosition, 2, enemyGraphics);
+		//GameObject enemyGraphics = this.spawner.SpawnPrefab("Enemy");
+		GameObject enemyGraphics = this.enemyPool.GetObjectInstance();
+		EnemyBase enemy = new EnemyBase(randomPosition, 2);
+		enemy.SetGameObject(enemyGraphics);
 		this.enemies.Add(enemy);
 	}
 
@@ -98,7 +104,7 @@ public class LevelBase : MonoBehaviour, ILevel // Add spawner (monobehaviour)
 		// Update all the game objects
 		this.player.Update(deltaTime, this.world);
 
-		foreach (IKillableEntity enemy in this.enemies)
+		foreach (EnemyBase enemy in this.enemies)
 		{
 			if (!enemy.IsAlive())
 				continue;
@@ -134,9 +140,12 @@ public class LevelBase : MonoBehaviour, ILevel // Add spawner (monobehaviour)
 				this.bulletPool.ReturnObjectInstance(bullet.ReturnGameObject());
 				bullet.Destroy();
 			}
-		foreach (IKillableEntity enemy in this.enemies)
+		foreach (EnemyBase enemy in this.enemies)
 			if (!enemy.IsAlive())
+			{
+				this.enemyPool.ReturnObjectInstance(enemy.ReturnGameObject());
 				enemy.Destroy();
+			}
 		
 		this.bullets.RemoveAll(b => !b.IsAlive()); // Remove all dead bullets
 		this.enemies.RemoveAll(e => !e.IsAlive()); // Remove all dead enemies
