@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
 	// Temp Prefab references
-	public Spawner spawner;
 	public LevelBase levelModel;
+	public Text ScoreText;
 	private bool debugDrawOn = false;
 
 	// Model
@@ -20,8 +21,7 @@ public class GameController : MonoBehaviour
 		this.worldModel = new WorldBase(5, upperPoint, lowerPoint);
 
 		// Start level model
-		//this.levelModel = new LevelBase(this.worldModel, spawner);
-		this.levelModel.Setup(this.worldModel, spawner);
+		this.levelModel.Setup(this.worldModel);
 		this.levelModel.Load();
 
 		//
@@ -36,6 +36,7 @@ public class GameController : MonoBehaviour
 	void Update()
 	{
 		//this.levelModel.Update(Time.deltaTime);
+		this.ScoreText.text = this.levelModel.GetScore().ToString();
 	}
 
 	// Debug draw
