@@ -4,14 +4,18 @@ using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
-	// Temp Prefab references
+	// Inspector References
 	public LevelBase levelModel;
 	public Text ScoreText;
+	public CameraShake cameraShake;
 	private bool debugDrawOn = false;
 
 	// Model
 	//private ILevel levelModel;
 	private IWorld worldModel;
+
+	// Delegates
+	public delegate void ShakeCameraMethod(float amount);
 
 	void Awake()
 	{
@@ -21,7 +25,7 @@ public class GameController : MonoBehaviour
 		this.worldModel = new WorldBase(5, upperPoint, lowerPoint);
 
 		// Start level model
-		this.levelModel.Setup(this.worldModel);
+		this.levelModel.Setup(this.worldModel, this.ShakeCamera);
 		this.levelModel.Load();
 
 		//
@@ -37,6 +41,11 @@ public class GameController : MonoBehaviour
 	{
 		//this.levelModel.Update(Time.deltaTime);
 		this.ScoreText.text = this.levelModel.GetScore().ToString();
+	}
+
+	public void ShakeCamera(float amount)
+	{
+		this.cameraShake.ShakeImpulse(amount);
 	}
 
 	// Debug draw

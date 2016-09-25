@@ -40,6 +40,9 @@ public class PlayerBase : KillableEntityBase, IPlayer
 
 	private void HandleInput(IWorld world)
 	{
+		if (!this.alive)
+			return;
+
 		PlayerMoveDirection dir = this.controller.PollInput();
 		if (dir == PlayerMoveDirection.NONE)
 			return;
