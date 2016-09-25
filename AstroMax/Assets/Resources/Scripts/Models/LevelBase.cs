@@ -29,9 +29,13 @@ public class LevelBase : MonoBehaviour, ILevel // Add spawner (monobehaviour)
 	// Public delegates
 	public delegate void FireBulletMethod(Vector2 position);
 
-	public void Setup(IWorld world)
+	// Stored delegates
+	private GameController.ShakeCameraMethod cameraShakeMethod;
+
+	public void Setup(IWorld world, GameController.ShakeCameraMethod cameraShake)
 	{
 		this.world = world;
+		this.cameraShakeMethod = cameraShake;
 
 		this.paused = false;
 		this.score = 0;
@@ -58,21 +62,29 @@ public class LevelBase : MonoBehaviour, ILevel // Add spawner (monobehaviour)
 		this.paused = false;
 
 		// Start spawning enemies
-		InvokeRepeating("SpawnEnemy", 2f, 0.65f);
+		//InvokeRepeating("SpawnEnemy", 2f, 0.65f);
+		StartCoroutine(SpawnEnemies());
 	}
 
-	private void SpawnEnemy()
+	private IEnumerator SpawnEnemies()
 	{
-		// Random lane
-		int lane = Random.Range(0, this.world.GetLaneCount()) + 1;
-		Vector2 randomPosition = new Vector2(this.world.LaneToEndPoint(lane).x, this.world.GetUpperBound().y);
-		//Debug.Log(lane);
+		yield return new WaitForSeconds(2f);
+		while (player.IsAlive())
+		{
+			// Random lane
+			int lane = Random.Range(0, this.world.GetLaneCount()) + 1;
+			Vector2 randomPosition = new Vector2(this.world.LaneToEndPoint(lane).x, this.world.GetUpperBound().y);
+			//Debug.Log(lane);
+				
+			//GameObject enemyGraphics = this.spawner.SpawnPrefab("Enemy");
+			GameObject enemyGraphics = this.enemyPool.GetObjectInstance();
+			EnemyBase enemy = new EnemyBase(randomPosition, 2);
+			enemy.SetGameObject(enemyGraphics);
+			this.enemies.Add(enemy);
 
-		//GameObject enemyGraphics = this.spawner.SpawnPrefab("Enemy");
-		GameObject enemyGraphics = this.enemyPool.GetObjectInstance();
-		EnemyBase enemy = new EnemyBase(randomPosition, 2);
-		enemy.SetGameObject(enemyGraphics);
-		this.enemies.Add(enemy);
+			// wait
+			yield return new WaitForSeconds(0.65f);
+		}
 	}
 
 	private void FireBullet(Vector2 position)
@@ -135,6 +147,13 @@ public class LevelBase : MonoBehaviour, ILevel // Add spawner (monobehaviour)
 				continue;
 			
 			enemy.Update(deltaTime, this.world);
+
+			if (enemy.GetPosition().y < player.GetPosition().y)
+			{
+				enemy.TakeDamage(enemy.GetMaxHitPoints() + 1);
+				player.TakeDamage(1);
+				this.cameraShakeMethod(0.5f);
+			}
 		}
 
 
@@ -153,6 +172,7 @@ public class LevelBase : MonoBehaviour, ILevel // Add spawner (monobehaviour)
 				{
 					enemy.TakeDamage(1);
 					bullet.TakeDamage(bullet.GetMaxHitPoints() + 1); // Kill bullet
+					this.cameraShakeMethod(0.15f);
 				}
 			}
 		}
@@ -171,6 +191,7 @@ public class LevelBase : MonoBehaviour, ILevel // Add spawner (monobehaviour)
 			{
 				energyBit.TakeDamage(1);
 				this.score++;
+				this.cameraShakeMethod(0.05f);
 			}
 		}
 			
@@ -190,6 +211,7 @@ public class LevelBase : MonoBehaviour, ILevel // Add spawner (monobehaviour)
 			{
 				this.enemyPool.ReturnObjectInstance(enemy.ReturnGameObject());
 				enemy.Destroy();
+				this.cameraShakeMethod(0.35f);
 
 				// Spawn energy bits
 				if (enemy.GetPosition().y > this.world.GetLowerBound().y + 1f)
@@ -208,6 +230,9 @@ public class LevelBase : MonoBehaviour, ILevel // Add spawner (monobehaviour)
 		this.bullets.RemoveAll(b => !b.IsAlive()); 		// Remove all dead bullets
 		this.enemies.RemoveAll(e => !e.IsAlive()); 		// Remove all dead enemies
 		this.energyBits.RemoveAll(e => !e.IsAlive()); 	// Remove all dead energy bits
+
+		//if (!player.IsAlive())
+			//Debug.Log("dead");
 	}
 
 	public int GetScore()
